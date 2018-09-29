@@ -1,5 +1,5 @@
 <template>
-    <div style="background: #f1f1f1;height:100vh;">
+    <div style="background: #f1f1f1">
         <div class="header">
             <div class="header-middle">
                 <div class="header-l">
@@ -17,15 +17,48 @@
                         <img src="../static/img/banner.jpg" alt="">
                         <div class="content-title">十三亿人都会用的云笔记</div>
                     </div>
-                    <div class="img-foot"></div>
+
+
+                    <!-- <div class="img-foot"></div> -->
+                 
+                    <div class="article">
+                        <div class="article-item" @click="jumpDetail(item._id)" v-for="(item,index) in article" :key="index">
+                            <div class="article-top">
+                                <div class="article-avatar">
+                                    <img :src="item.author.avatar" alt="">
+                                </div>
+                                <div class="article-msg">
+                                    <div class="row-one">
+                                        <span class="author-name">{{item.author.username}}</span>
+                                        <!-- <span>|</span> -->
+                                        <h2>{{item.title}}</h2>
+                                    </div>
+                                    <div class="row-two">
+                                        <span class="row-item">浏览：{{item.readnumber}}</span>
+                                        <span class="row-item">回复：{{item.commonnum}}</span>
+                                        <span class="row-item">分类：{{item.category.name}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="article-content">
+                                <div>
+                                    {{item.contentText}}
+                                </div>
+                            </div>
+                            <div class="article-footer"></div>
+                        </div>
+                    </div>
+        
+
+
                 </div>
-                <div class="content-r" v-if="isShowLogin">
+                <div class="content-r" v-if="!this.$store.state.userInfo.username">
                     <div class="login-box">
                         <div class="item">
-                            <el-input v-model="username" style="height:45px" type="text" placeholder="请输入用户名"></el-input>
+                            <el-input v-model="formData.email" style="height:45px" type="text" placeholder="请输入邮箱"></el-input>
                         </div>
                         <div class="item">
-                            <el-input v-model="password" style="height:45px" type="password" placeholder="请输入密码"></el-input>
+                            <el-input v-model="formData.password" style="height:45px" type="password" @keyup.enter.native="handleLogin" placeholder="请输入密码"></el-input>
                         </div>
                         <div class="item">
                             <el-button style="width:300px;height:40px;" @click="handleLogin" type="primary">登录</el-button>
@@ -38,12 +71,12 @@
                 <div class="content-r" v-else>
                     <div style="padding-top:30px;">
                         <div style="text-align: center">
-                            <img class="avatar-img" src="../static/img/avatar1.jpg" alt="">
+                            <img class="avatar-img" :src="userInfo.avatar">
                         </div>
-                        <div class="login-item">萌新： wangcai</div>
-                        <div class="login-item">email: 121381@qq.com</div>
+                        <div class="login-item">萌新： {{userInfo.username}}</div>
+                        <div class="login-item">email: {{userInfo.email}}</div>
                         <div style="margin-top:10px">
-                            <el-button style="width:300px;height:40px;" @click="handleLogin" type="warning">退出登录</el-button>
+                            <el-button style="width:300px;height:40px;" @click="handleLogout" type="warning">退出登录</el-button>
                         </div>
                     </div>
                 </div>
@@ -53,12 +86,20 @@
 </template>
 
 <script>
+    import { mapState } from "vuex";
     export default {
         data () {
             return{
-                isShowLogin:true,
-                username:'',
-                password:''
+                formData:{
+                    email:'',
+                    password:''
+                },
+                userData:{
+                    avatar:'',
+                    username:'',
+                    email:''
+                },
+                article:[]
             }
         },
         methods:{
@@ -66,12 +107,58 @@
                 this.$router.push('/register')
             },
             handleWriteNote () {
-                this.$router.push('/writenote')
+                if(this.$store.state.userInfo.username){
+                    this.$router.push('/writenote')
+                }else{
+                    this.$message.info('登录后才能写笔记哦！')
+                }
             },
             handleLogin () {
-                if(this.username == 'xiaozhu' && this.password == 'xiaozhu'){
-                    this.isShowLogin = false
-                }
+                this.$axios.post('/login',this.formData).then(res => {
+                    console.log(res)
+                    if(res.code == 200){
+                        this.$message.success(res.msg)
+                        this.$store.commit('CHANGE_userInfo', res.userData)
+                        this.getArticleData()
+                    }
+                })
+            },
+            handleLogout () {
+                this.$axios.get('/logout').then(res => {
+                    let userInfo = {
+                        avatar:'',
+                        email:'',
+                        username:''
+                    }
+                    if(res.code == 200){
+                        this.$message.success(res.msg)
+                        this.$store.commit('CHANGE_userInfo', userInfo) //清空vuex当中的状态
+                        this.$router.push('/')
+                    }else{ //未登录状态
+                        this.$store.commit('CHANGE_userInfo', userInfo) //清空vuex当中的状态
+                        this.$message.info('登录过期,自动退出')
+                    }
+                })
+            },
+            getArticleData () {
+                this.$axios.get('/article').then(res => {
+                    console.log(res)
+                    this.article = res.data
+                })
+            },
+            jumpDetail (id) {
+                this.$router.push({
+                    name : 'articledetail',
+                    params: {id}
+                })
+            }
+        },
+        computed:{
+            ...mapState(['userInfo'])
+        },
+        created () {
+            if(this.$store.state.userInfo.username){
+                this.getArticleData()
             }
         }
     }
@@ -173,5 +260,79 @@
         color: #333;
         font-weight: 400;
         line-height: 36px;
+    }
+
+    /* 文章显示部分 */
+    .article{
+        box-sizing: border-box;
+        margin-top: 30px;
+        border-radius: 4px;
+        padding: 2px 20px;
+        background: #fff;
+    }
+    .article-item{
+        text-decoration: none;
+        color: #333;
+        display: block;
+        padding-bottom: 20px;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+    .article-top{
+        display: flex;
+    }
+    .article-avatar{
+        margin-right: 15px;
+        width: 80px;
+        height: 80px;
+    }
+    .article-avatar img{
+        display: block;
+        width: 100%;
+    }
+    .article-msg{
+        width: 100%;
+    }
+    .row-one{
+        display: flex;
+    }
+    .row-one h2{
+        font-size: 18px;
+        font-weight: 700;
+        margin-left: 15px;
+        height: 28px;
+        line-height: 28px;
+    }
+    .row-two{
+        box-sizing: border-box;
+        padding: 4px 8px;
+        margin-top: 15px;
+        border-radius: 4px;
+        width: 100%;
+        background: #bbb;
+        display: flex;
+    }
+    .author-name{
+        color: #409eff;
+        font-weight: 700;
+        padding-right: 8px;
+        border-right: 1px solid #000;
+        height: 28px;
+        line-height: 28px;
+    }
+    .row-item{
+        font-size: 14px;
+        color: #333;
+        font-weight: 700;
+        margin-right: 30px;
+    }
+    .article-content{
+        display: flex;
+    }
+    .article-footer{
+        width: 100%;
+        height: 5px;
+        margin-top: 20px;
+        background-color: #f1f1f1;
     }
 </style>

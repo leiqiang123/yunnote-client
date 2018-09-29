@@ -13,10 +13,10 @@
         <div class="content">
             <div class="register">
                 <h2 class="title">新用户注册</h2>
-                <div class="item"><el-input style="height:45px" type="text" placeholder="用户名"></el-input></div>
-                <div class="item"><el-input style="height:45px" type="text" placeholder="邮箱"></el-input></div>
-                <div class="item"><el-input style="height:45px" type="password" placeholder="密码"></el-input></div>
-                <div class="item"><el-button style="width:390px;height:40px;" type="primary">注册</el-button></div>
+                <div class="item"><el-input v-model="user.username" style="height:45px" type="text" placeholder="用户名"></el-input></div>
+                <div class="item"><el-input v-model="user.email" style="height:45px" type="text" placeholder="邮箱"></el-input></div>
+                <div class="item"><el-input v-model="user.password" style="height:45px" type="password" placeholder="密码" @keyup.enter.native="handleRegister"></el-input></div>
+                <div class="item"><el-button @click="handleRegister" style="width:390px;height:40px;" type="primary">注册</el-button></div>
             </div>
         </div>
     </div>
@@ -26,7 +26,11 @@
     export default {
         data () {
             return{
-
+                user:{
+                    username:'',
+                    email:'',
+                    password:''
+                }
             }
         },
         methods:{
@@ -35,6 +39,16 @@
             },
             handleWriteNote () {
                 this.$router.push('/writenote')
+            },
+            handleRegister () {
+                this.$axios.post('/user',this.user).then(res => {
+                    if(res.code == 200){
+                        this.$message.success('注册成功')
+                        setTimeout(() => {this.$router.push('/')},500)
+                    }else{
+                        this.$message.error(res.msg)
+                    }
+                })
             }
         }
     }

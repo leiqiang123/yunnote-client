@@ -16,19 +16,29 @@
                     <div class="title">
                         <span>标题</span>
                     </div>
-                    <el-input class="write-input" type="text" placeholder="请输入笔记标题"></el-input>
+                    <el-input v-model="formData.title" class="write-input" type="text" placeholder="请输入笔记标题"></el-input>
                 </div>
                 <div>
                     <div class="title">内容</div>
                     <div class="rich-text mt10">
-                        <quill-editor v-model="ruleForm.words" ref="myQuillEditor" class="editer" :options="editorOption" @ready="onEditorReady($event)">
+                        <quill-editor v-model="ruleForm.words" ref="myQuillEditor" class="editer" :options="editorOption" @change="handleChange">
                         </quill-editor>
                     </div>
                     <div class="mt10 label">
-                        <span class="label-title">标签：</span>
+                        <span class="label-title">分类：</span>
+                        <template>
+                            <el-select v-model="formData.category" placeholder="请选择">
+                                <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item._id">
+                                </el-option>
+                            </el-select>
+                        </template>
                     </div>
                     <div style="text-align: left;">
-                        <el-button style="width:98px;height:40px;margin-top: 20px;" type="primary">发布笔记</el-button>
+                        <el-button style="width:98px;height:40px;margin-top: 20px;" @click="handleIssue" type="primary">发布笔记</el-button>
                     </div>
                 </div>
             </div>
@@ -48,20 +58,49 @@
         data () {
             return {
                 ruleForm:{},
-                editorOption: {}
+                editorOption: {},
+                formData:{
+                    content:'',
+                    contentText:'',
+                    title:'',
+                    category:''
+                },
+                options:[],
             }
         },
         methods:{
             handleLogin () {
                 this.$router.push('/')
             },
-            onEditorReady(editor) {
+            handleIssue () {
+                this.formData.content = this.ruleForm.words
+                console.log(this.formData)
+                this.$axios.post('/article',this.formData).then(res => {
+                    if(res.code == 200){
+                        this.$message.success(res.msg)
+                    }else{
+                        this.$message.error('发布失败')
+                    }
+                })
+            },
+            handleChange ({quill, html, text}) {
+                this.formData.contentText = text
+                this.formData.contentText = this.formData.contentText.substring(0,200) + '...'
+            },
+            getCategory () {
+                this.$axios.get('/category').then(res => {
+                    console.log(res)
+                    this.options = res.data
+                })
             }
         },
         computed: {
             editor() {
                 return this.$refs.myQuillEditor.quill
             }
+        },
+        created () {
+            this.getCategory()
         }
     }
 </script>

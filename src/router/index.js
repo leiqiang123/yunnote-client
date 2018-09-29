@@ -20,6 +20,11 @@ export default new Router({
       path:'/writenote',
       name:'writenote',
       component:() => import('../views/writenote')
+    },
+    {
+      path:'/articledetail',
+      name:'articledetail',
+      component:() => import('../views/articledetail')
     }
   ]
 })
