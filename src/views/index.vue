@@ -19,9 +19,9 @@
                     </div>
 
 
-                    <!-- <div class="img-foot"></div> -->
+                    <div class="img-foot" v-if="!this.$store.state.userInfo.username"></div>
                  
-                    <div class="article">
+                    <div class="article" v-else>
                         <div class="article-item" @click="jumpDetail(item._id)" v-for="(item,index) in article" :key="index">
                             <div class="article-top">
                                 <div class="article-avatar">
@@ -265,8 +265,8 @@
     /* 文章显示部分 */
     .article{
         box-sizing: border-box;
-        margin-top: 30px;
-        border-radius: 4px;
+        margin: 30px 0;
+        border-radius: 6px;
         padding: 2px 20px;
         background: #fff;
     }

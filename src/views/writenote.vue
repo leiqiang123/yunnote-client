@@ -37,7 +37,7 @@
                             </el-select>
                         </template>
                     </div>
-                    <div style="text-align: left;">
+                    <div style="text-align: left; margin-bottom:10px;">
                         <el-button style="width:98px;height:40px;margin-top: 20px;" @click="handleIssue" type="primary">发布笔记</el-button>
                     </div>
                 </div>
@@ -134,12 +134,11 @@
     }
     .write-container{
         width: 1170px;
-        margin: 0 auto;
+        margin: 30px auto;
         box-sizing: border-box;
-        margin-top: 30px;
         padding: 8px 24px;
         background: #fff;
-        border-radius: 4px;
+        border-radius: 6px;
     }
     .write-input{
         width: 1122px;

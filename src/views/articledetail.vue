@@ -25,6 +25,19 @@
                             </div>
                         </div>
                         <div id="article"></div>
+                        <!-- <div class="spance"></div>
+                        <div class="comment">
+                            <div style="margin:20px 0; color:skyblue"><span>评论：</span></div>
+                            <el-input
+                                type="textarea"
+                                :rows="2"
+                                placeholder="请输入内容"
+                                v-model="textarea">
+                            </el-input>
+                            <el-button style="margin:20px 0;" type="primary">提交评论</el-button>
+                        </div>
+                        <div class="spance"></div>
+                        <div style="margin:20px 0; color:skyblue"><span>评论区：</span></div> -->
                     </div>
                 </div>
                 <div class="content-desc">
@@ -57,13 +70,14 @@
                     readnumber:'',
                     createTime:''
                 },
-                categoryTitle:''
+                categoryTitle:'',
+                textarea:''
             }
         },
         methods:{
             getArticleData () {
-                this.$axios.get(`/article/${ this.$route.params.id}`).then(res => {
-                    // console.log(res)
+                this.$axios.get(`/article/${this.$route.params.id}`).then(res => {
+                    console.log(res)
                     this.articleData = res.data
                     const articleContent = document.getElementById('article')
                     articleContent.innerHTML = res.data.content
@@ -127,8 +141,7 @@
     }
     .content{
         background-color: #f1f1f1;
-        padding-top: 20px;
-        height: 100vh;
+        padding: 20px 0;
     }
     .content-area{
         width: 960px;
@@ -209,5 +222,15 @@
         padding-top: 10px;
         text-align: center;
         color: chartreuse
+    }
+    .spance{
+        width:652px;
+        height:10px;
+        background-color:#f1f1f1;
+        border-radius: 6px;
+    }
+    .comment{
+        width: 652px;
+        background-color: #fff;
     }
 </style>

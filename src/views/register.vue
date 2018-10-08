@@ -1,5 +1,5 @@
 <template>
-    <div style="background: #f1f1f1;height:100vh;">
+    <div style="background: #f1f1f1;">
         <div class="header">
             <div class="header-middle">
                 <div @click="handleLogin" class="header-l">
